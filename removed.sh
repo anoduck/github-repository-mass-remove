@@ -7,6 +7,7 @@ COUNT=1;
 linkPermission='https://github.com/settings/tokens/new?scopes=delete_repo&description=Mass+remove+repository'
 access_token=''
 repositoriesFile='repositories.txt'
+savedTokenFile='token.txt'
 
 countSuccessfully=0;
 countFailed=0;
@@ -16,15 +17,14 @@ promptAccessToken() {
 	read -p "${yellow}Access Token${reset}: " access_token
 }
 
-
 checkToken() {
 	while true; do
 		if [[ $(curl -H "Authorization: token $access_token" -s "https://api.github.com/user" -I | grep -i "HTTP/1.1 200 OK") != "" ]]
 			then
-				if [ ! -f token.txt ];
+				if [ ! -f $savedTokenFile ];
 					then
-					echo "${green}Wow. Token is correct. I write your token to ${reset}${yellow}'token.txt'${reset}"
-					echo $access_token > token.txt
+					echo "${green}Wow. Token is correct. I write your token to ${reset}${yellow}'$savedTokenFile'${reset}"
+					echo $access_token > $savedTokenFile
 				else
 					echo "${green}Token is correct.${reset}"
 				fi
@@ -57,7 +57,7 @@ if [[ $numOfLinesRepositoryList == 0 ]]
 	echo "${yellow}File '${repositoriesFile}' the number of rows is equal to zero. Just sad :c ${reset}"
 	exit
 else
-	if [ ! -f token.txt ]; 
+	if [ ! -f $savedTokenFile ]; 
 		then
 			echo "${yellow}Head to ${reset}${linkPermission} ${yellow}to retrieve a token.${reset}"
 			echo "${green}Please enter your GitHub token from removed repositories:${reset}"
@@ -68,11 +68,9 @@ else
 			while IFS= read -r token || [ -n "$token" ]; do
 				access_token=$token
 				checkToken
-			done < token.txt
+			done < $savedTokenFile
 	fi
 fi
-
-
 
 while IFS= read -r repo || [ -n "$repo" ]; do
 	if [[ $(curl -X DELETE -H "Authorization: token $access_token" -s "https://api.github.com/repos/$repo" -I | grep -i "HTTP/1.1 404 Not Found") != "" ]]
