@@ -5,30 +5,74 @@ yellow=`tput setaf 3`
 reset=`tput sgr0`
 COUNT=1;
 linkPermission='https://github.com/settings/tokens/new?scopes=delete_repo&description=Mass+remove+repository'
+access_token=''
+repositoriesFile='repositories.txt'
 
 countSuccessfully=0;
 countFailed=0;
-
-echo "${yellow}Head to ${reset}${linkPermission} ${yellow}to retrieve a token.${reset}"
-echo "${green}Please enter your GitHub token from removed repositories:${reset}"
+numOfLinesRepositoryList=0
 
 promptAccessToken() {
 	read -p "${yellow}Access Token${reset}: " access_token
 }
 
-promptAccessToken
 
-while true; do
-	if [[ $(curl -H "Authorization: token $access_token" -s "https://api.github.com/user" -I | grep -i "HTTP/1.1 200 OK") != "" ]]
+checkToken() {
+	while true; do
+		if [[ $(curl -H "Authorization: token $access_token" -s "https://api.github.com/user" -I | grep -i "HTTP/1.1 200 OK") != "" ]]
+			then
+				if [ ! -f token.txt ];
+					then
+					echo "${green}Wow. Token is correct. I write your token to ${reset}${yellow}'token.txt'${reset}"
+					echo $access_token > token.txt
+				else
+					echo "${green}Token is correct.${reset}"
+				fi
+
+				echo "${green}I begin remove repository:${reset}";
+				break
+			else
+				echo "${red}Bad access_token. Try again.${reset}"
+				promptAccessToken
+		fi
+	done
+}
+
+printf "\n"
+echo "---------------------"
+echo "${yellow} Youre running script to remove all github repositories listed in the file :D${reset}"
+echo "---------------------"
+printf "\n"
+
+if [ ! -f $repositoriesFile ]; 
+	then
+		echo "${red}You have not create file '${repositoriesFile}'.${reset}"
+		exit
+	else
+	numOfLinesRepositoryList=$(wc -l < ${repositoriesFile})
+fi
+
+if [[ $numOfLinesRepositoryList == 0 ]]
+	then
+	echo "${yellow}File '${repositoriesFile}' the number of rows is equal to zero. Just sad :c ${reset}"
+	exit
+else
+	if [ ! -f token.txt ]; 
 		then
+			echo "${yellow}Head to ${reset}${linkPermission} ${yellow}to retrieve a token.${reset}"
+			echo "${green}Please enter your GitHub token from removed repositories:${reset}"
 			printf "\n"
-			echo "${green}Wow. Great token. I begin to remove the repository:${reset}";
-			break
-		else
-			echo "${red}Bad access_token. Try again.${reset}"
 			promptAccessToken
+			checkToken
+		else
+			while IFS= read -r token || [ -n "$token" ]; do
+				access_token=$token
+				checkToken
+			done < token.txt
 	fi
-done
+fi
+
+
 
 while IFS= read -r repo || [ -n "$repo" ]; do
 	if [[ $(curl -X DELETE -H "Authorization: token $access_token" -s "https://api.github.com/repos/$repo" -I | grep -i "HTTP/1.1 404 Not Found") != "" ]]
@@ -45,8 +89,14 @@ while IFS= read -r repo || [ -n "$repo" ]; do
 	fi
 
 	COUNT=$(( $COUNT + 1 ))
-done < repositories.txt
+	sed -i '1,1 d' ${repositoriesFile}
+done < $repositoriesFile
 
-echo "${yellow}Script has completed execution.${reset}"
+echo "---------------------"
+echo "${yellow} Script has completed execution.${reset}"
+echo "---------------------"
+echo " Statistics: "
 printf "$green - Successfully removed:$reset $countSuccessfully"
-printf "$red\n - Failed removed:$reset $countFailed"
+printf "$red\n - Failed removed:$reset $countFailed\n"
+echo "---------------------"
+printf "\n"
