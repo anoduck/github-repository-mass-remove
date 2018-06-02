@@ -1,11 +1,21 @@
 #!/bin/sh
+# ========================================================================================================
+#  - Instructions
+# 		0. Add desired repos to repositories.txt
+# 		1. visit the link below labeled "linkPermission" and follow the directions
+# 		2. Correct this file, adding your own access token below.
+# 		3. Enter `sh ./removed.sh` in the terminal and press return.
+# 		3. Regardless, it will still prompt for your token, press enter. 
+# 		4. And away it goes...
+# ---------------------------------------------------------------------------------------------------------
+
 red=`tput setaf 1`
 green=`tput setaf 2`
 yellow=`tput setaf 3`
 reset=`tput sgr0`
 COUNT=1;
 linkPermission='https://github.com/settings/tokens/new?scopes=delete_repo&description=Mass+remove+repository'
-access_token=''
+access_token='$[Place your access token here]'
 repositoriesFile='repositories.txt'
 savedTokenFile='token.txt'
 
@@ -13,8 +23,12 @@ countSuccessfully=0;
 countFailed=0;
 numOfLinesRepositoryList=0
 
+#promptAccessToken() {
+#	read "${yellow}Access Token${reset}: " access_token
+#}
+
 promptAccessToken() {
-	read -p "${yellow}Access Token${reset}: " access_token
+	export ACCESS_TOKEN="c8d58411bbeb7154f8d5b8ce30ee72a29c69749e"
 }
 
 checkToken() {
