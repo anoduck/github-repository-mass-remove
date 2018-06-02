@@ -1,4 +1,12 @@
-# Gitignore for sensative data
-# ----------------------------
+# Gitignore for sensative data #
+# ##############################
+.Trashes
+._*
+^*\~$
+Thumbs.db
+
+# Customized config files #
+# do not include these #
+##########################
 token.txt
 repositories.txt
