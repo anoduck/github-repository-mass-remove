@@ -1,3 +1,4 @@
-#Gitignore for sensative data
-./token.txt
-./repositories.txt
+# Gitignore for sensative data
+# ----------------------------
+token.txt
+repositories.txt
