@@ -28,7 +28,7 @@ numOfLinesRepositoryList=0
 #}
 
 promptAccessToken() {
-	export ACCESS_TOKEN="c8d58411bbeb7154f8d5b8ce30ee72a29c69749e"
+	export ACCESS_TOKEN=" #$ACCESSTOKEN# " # --> Change this, obviously...
 }
 
 checkToken() {
